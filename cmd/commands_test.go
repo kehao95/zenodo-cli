@@ -24,9 +24,7 @@ func newFixture(t *testing.T) *fixture {
 	t.Helper()
 	t.Setenv("ZENODO_CLI_READ_ONLY", "")
 	t.Setenv("ZENODO_BASE_URL", "")
-	t.Setenv("ZENODO_ACCESS_TOKEN", "")
-	t.Setenv("ZENODO_SANDBOX_ACCESS_TOKEN", "")
-	t.Setenv("ZENODO_CUSTOM_ACCESS_TOKEN", "fixture-token")
+	t.Setenv("ZENODO_ACCESS_TOKEN", "fixture-token")
 	f := &fixture{t: t}
 	f.server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		f.calls = append(f.calls, r.Method+" "+r.URL.RequestURI())
@@ -296,17 +294,19 @@ func TestPreviewAndMetadata(t *testing.T) {
 func TestEnvironmentAuthStatusAndFileInput(t *testing.T) {
 	f := newFixture(t)
 	code, out, e := f.run("", "auth", "status", "--human")
-	if code != 0 || !strings.Contains(out, `"configured": true`) || !strings.Contains(out, "ZENODO_CUSTOM_ACCESS_TOKEN") || strings.Contains(out, "fixture-token") || strings.Contains(out, `"config":`) {
+	if code != 0 || !strings.Contains(out, `"configured": true`) || !strings.Contains(out, "ZENODO_ACCESS_TOKEN") || strings.Contains(out, "fixture-token") || strings.Contains(out, `"config":`) {
 		t.Fatalf("%d %s %s", code, out, e)
 	}
-	t.Setenv("ZENODO_CUSTOM_ACCESS_TOKEN", "")
+	t.Setenv("ZENODO_ACCESS_TOKEN", "")
+	t.Setenv("ZENODO_SANDBOX_ACCESS_TOKEN", "ignored-sandbox-token")
+	t.Setenv("ZENODO_CUSTOM_ACCESS_TOKEN", "ignored-custom-token")
 	if code, out, e = f.run("", "auth", "status"); code != 0 || !strings.Contains(out, `"configured":false`) {
 		t.Fatalf("%d %s %s", code, out, e)
 	}
 	if code, _, _ = f.run("", "auth", "test"); code != 2 || len(f.calls) != 0 {
 		t.Fatal("missing token accepted or request sent")
 	}
-	t.Setenv("ZENODO_CUSTOM_ACCESS_TOKEN", "fixture-token")
+	t.Setenv("ZENODO_ACCESS_TOKEN", "fixture-token")
 	metadata := filepath.Join(t.TempDir(), "metadata.json")
 	os.WriteFile(metadata, []byte(`{"title":"File input"}`), 0600)
 	f.handler = func(w http.ResponseWriter, r *http.Request) {
@@ -341,6 +341,7 @@ func TestEnvironmentAuthIgnoresLegacyConfig(t *testing.T) {
 	}
 	for _, args := range [][]string{
 		{"auth", "login"}, {"auth", "logout"}, {"auth", "status", "--config", path},
+		{"auth", "status", "--sandbox"},
 	} {
 		if code, out, _ := f.run("", args...); code != 2 || out != "" {
 			t.Errorf("removed option accepted: %v", args)

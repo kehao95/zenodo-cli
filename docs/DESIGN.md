@@ -80,11 +80,12 @@ GET redirects stay on-origin; mutation redirects are rejected rather than
 changing methods or replaying a write. HTTPS is required except loopback HTTP
 for tests. TLS verification is always enabled.
 
-Public endpoints work anonymously; private commands require a token. Production
-and sandbox environment variables apply only to their exact endpoints; custom
-hosts use `ZENODO_CUSTOM_ACCESS_TOKEN`. No credential files are read or written;
-there is no login/logout persistence flow or config-path flag. Existing v0.1.0
-config files are ignored and left untouched. Errors redact the selected credential.
+Public endpoints work anonymously; private commands require `ZENODO_ACCESS_TOKEN`.
+This is the only credential source. There is no config file, login/logout flow,
+sandbox mode or endpoint-specific token selection. Existing v0.1.0 config files
+are ignored and left untouched. Explicit endpoint overrides use the same token;
+response links and redirects remain restricted to the selected origin.
+Errors redact the credential.
 
 ## Pagination, retries and limits
 

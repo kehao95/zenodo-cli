@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 	"time"
 
@@ -15,13 +16,12 @@ import (
 )
 
 type app struct {
-	client                   *zenodo.Client
-	source                   string
-	base                     string
-	sandbox, human, readOnly bool
-	confirm                  string
-	timeout                  time.Duration
-	retries                  int
+	client          *zenodo.Client
+	base            string
+	human, readOnly bool
+	confirm         string
+	timeout         time.Duration
+	retries         int
 }
 
 func New(in io.Reader, out, errOut io.Writer, version string) *cobra.Command {
@@ -33,12 +33,11 @@ func New(in io.Reader, out, errOut io.Writer, version string) *cobra.Command {
 	root.RunE = func(cmd *cobra.Command, args []string) error { return cmd.Help() }
 	root.SetFlagErrorFunc(func(_ *cobra.Command, err error) error { return errs.New(2, "invalid_input", err.Error()) })
 	root.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
-		endpoint, err := config.Endpoint(a.base, a.sandbox)
+		endpoint, err := config.Endpoint(a.base)
 		if err != nil {
 			return err
 		}
-		token, source := config.Token(endpoint)
-		a.source = source
+		token := strings.TrimSpace(os.Getenv("ZENODO_ACCESS_TOKEN"))
 		envRO, err := config.ReadOnly()
 		if err != nil {
 			return err
@@ -51,7 +50,6 @@ func New(in io.Reader, out, errOut io.Writer, version string) *cobra.Command {
 	}
 	f := root.PersistentFlags()
 	f.StringVar(&a.base, "base-url", "", "API URL (default: ZENODO_BASE_URL or https://zenodo.org/api)")
-	f.BoolVar(&a.sandbox, "sandbox", false, "use sandbox and its separate ZENODO_SANDBOX_ACCESS_TOKEN")
 	f.BoolVarP(&a.human, "human", "H", false, "pretty JSON for human inspection")
 	f.BoolVar(&a.readOnly, "read-only", false, "block every remote mutation")
 	f.StringVar(&a.confirm, "confirm", "", "target deposition ID for publish, delete or discard")

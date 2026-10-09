@@ -20,7 +20,7 @@ func (a *app) auth() *cobra.Command {
 	group := &cobra.Command{Use: "auth", Short: "Inspect and verify environment authentication", Args: cobra.NoArgs}
 	group.RunE = func(cmd *cobra.Command, _ []string) error { return cmd.Help() }
 	status := &cobra.Command{Use: "status", Short: "Show token source without revealing the token", Args: cobra.NoArgs, RunE: func(cmd *cobra.Command, _ []string) error {
-		return a.print(cmd, map[string]any{"endpoint": a.client.Base.String(), "configured": a.client.Token != "", "source": a.source, "read_only": a.client.Policy.ReadOnly})
+		return a.print(cmd, map[string]any{"endpoint": a.client.Base.String(), "configured": a.client.Token != "", "source": "ZENODO_ACCESS_TOKEN", "read_only": a.client.Policy.ReadOnly})
 	}}
 	test := &cobra.Command{Use: "test", Short: "Verify token using GET of your depositions (no mutations)", Args: cobra.NoArgs, RunE: func(cmd *cobra.Command, _ []string) error {
 		if err := a.client.RequireToken(); err != nil {
@@ -30,7 +30,7 @@ func (a *app) auth() *cobra.Command {
 		if err != nil {
 			return err
 		}
-		return a.print(cmd, map[string]any{"ok": true, "endpoint": a.client.Base.String(), "source": a.source})
+		return a.print(cmd, map[string]any{"ok": true, "endpoint": a.client.Base.String(), "source": "ZENODO_ACCESS_TOKEN"})
 	}}
 	group.AddCommand(status, test)
 	return group

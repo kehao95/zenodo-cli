@@ -19,7 +19,7 @@ Initial delivery checked on 2026-10-09 using Go 1.25.9 on Linux amd64.
   Each platform passed formatting, vet, race-enabled tests and build.
 
 Meaningful tests exercise actual command dispatch, request method/path/body,
-metadata precision and unknown fields, environment auth and credential isolation,
+metadata precision and unknown fields, environment auth and token redaction,
 all lifecycle actions, new-version draft resolution, metadata-preserving DOI
 reservation, native preview URLs, page aggregation and bounds, repeated page
 detection, input rejection, immutable read-only environment policy, matching
@@ -69,15 +69,15 @@ on 2026-10-09 from annotated tag `v0.1.0`, commit
   passed formatting, vet, race-enabled tests and build on all three platforms.
 - GitHub reports the release as published, neither draft nor prerelease.
 
-## Environment-only authentication follow-up
+## Simplified authentication follow-up
 
-Current source removes config-file reads/writes, `--config`, `ZENODO_CLI_CONFIG`,
-and `auth login`/`logout`. Existing v0.1.0 release artifacts remain unchanged.
-Authentication selects production, sandbox or custom environment credentials
-without cross-endpoint fallback. Tests cover selection/isolation, status token
-redaction, missing credentials without network access, ignored legacy config,
-and removed command/flag rejection. Full formatting, vet, race tests and build
-passed for this change on 2026-10-09.
+Current source uses only `ZENODO_ACCESS_TOKEN`. Config-file reads/writes,
+`--config`, `ZENODO_CLI_CONFIG`, `auth login`/`logout`, `--sandbox`, and
+endpoint-specific token selection are removed. Existing v0.1.0 release artifacts
+remain unchanged. Tests cover status token redaction, missing credentials without
+network access, ignored legacy config and token variables, removed command/flag
+rejection, and explicit endpoint override precedence. Formatting, vet, race tests
+and build are rerun for this change.
 
 ## Workspace closure
 

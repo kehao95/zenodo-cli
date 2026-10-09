@@ -5,51 +5,28 @@ import "testing"
 func TestEndpointValidation(t *testing.T) {
 	t.Setenv("ZENODO_BASE_URL", "")
 	tests := []struct {
-		base    string
-		sandbox bool
-		want    string
-		bad     bool
+		base, want string
+		bad        bool
 	}{
-		{"", false, Production, false}, {"", true, Sandbox, false},
-		{"http://127.0.0.1:5000/api/", false, "http://127.0.0.1:5000/api", false},
-		{"https://ZENODO.ORG/api", false, Production, false},
-		{"http://example.com/api", false, "", true}, {"https://token@example.com/api", false, "", true},
-		{"https://zenodo.org/api?access_token=x", false, "", true}, {"https://zenodo.org/", false, "", true},
-		{Production, true, "", true}, {"https://zenodo.org/api#fragment", false, "", true},
+		{"", Production, false},
+		{"http://127.0.0.1:5000/api/", "http://127.0.0.1:5000/api", false},
+		{"https://ZENODO.ORG/api", Production, false},
+		{"http://example.com/api", "", true}, {"https://token@example.com/api", "", true},
+		{"https://zenodo.org/api?access_token=x", "", true}, {"https://zenodo.org/", "", true},
+		{"https://zenodo.org/api#fragment", "", true},
 	}
 	for _, tt := range tests {
-		got, err := Endpoint(tt.base, tt.sandbox)
+		got, err := Endpoint(tt.base)
 		if (err != nil) != tt.bad || (!tt.bad && got != tt.want) {
-			t.Errorf("%q sandbox=%v: %q %v", tt.base, tt.sandbox, got, err)
+			t.Errorf("%q: %q %v", tt.base, got, err)
 		}
 	}
-	t.Setenv("ZENODO_BASE_URL", Sandbox)
-	if got, _ := Endpoint("", false); got != Sandbox {
+	t.Setenv("ZENODO_BASE_URL", "https://custom.invalid/api")
+	if got, _ := Endpoint(""); got != "https://custom.invalid/api" {
 		t.Fatal(got)
 	}
-}
-
-func TestEnvironmentCredentialIsolation(t *testing.T) {
-	t.Setenv("ZENODO_ACCESS_TOKEN", " production-token ")
-	t.Setenv("ZENODO_SANDBOX_ACCESS_TOKEN", "")
-	t.Setenv("ZENODO_CUSTOM_ACCESS_TOKEN", "")
-	for _, tt := range []struct{ endpoint, token, source string }{
-		{Production, "production-token", "ZENODO_ACCESS_TOKEN"},
-		{Sandbox, "", "ZENODO_SANDBOX_ACCESS_TOKEN"},
-		{"https://custom.invalid/api", "", "ZENODO_CUSTOM_ACCESS_TOKEN"},
-	} {
-		token, source := Token(tt.endpoint)
-		if token != tt.token || source != tt.source {
-			t.Errorf("%s: incorrect credential selection", tt.endpoint)
-		}
-	}
-	t.Setenv("ZENODO_SANDBOX_ACCESS_TOKEN", "sandbox-token")
-	t.Setenv("ZENODO_CUSTOM_ACCESS_TOKEN", "custom-token")
-	if token, _ := Token(Sandbox); token != "sandbox-token" {
-		t.Fatal("sandbox credential not selected")
-	}
-	if token, _ := Token("https://custom.invalid/api"); token != "custom-token" {
-		t.Fatal("custom credential not selected")
+	if got, _ := Endpoint(Production); got != Production {
+		t.Fatal("explicit endpoint did not override environment")
 	}
 }
 

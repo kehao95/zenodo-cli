@@ -1,27 +1,28 @@
-# v0.1.1 — Environment-only authentication
+# v0.1.2 — Simplified authentication
 
-Authentication now uses environment variables exclusively. The CLI no longer
-reads or writes credential files and removes `--config`, `auth login`, and
-`auth logout`. Existing config files are ignored and left untouched.
+Authentication uses only `ZENODO_ACCESS_TOKEN` from your shell. No credential
+files, login/logout flow, sandbox mode, or additional token variables are needed.
+Existing config files are ignored and left untouched.
 
-- Production: `ZENODO_ACCESS_TOKEN`.
-- Sandbox: `ZENODO_SANDBOX_ACCESS_TOKEN`.
-- Custom API endpoint: `ZENODO_CUSTOM_ACCESS_TOKEN`.
+`auth status` reports whether the token is set without revealing its value;
+`auth test` verifies it with a GET. The default endpoint is Zenodo; explicit
+`--base-url` / `ZENODO_BASE_URL` overrides use the same token. Response links
+and redirects remain restricted to the selected origin.
 
-`auth status` reports the selected variable without revealing its value;
-`auth test` verifies the credential with a GET. Production credentials are
-never reused for sandbox or custom hosts. All record, draft and file commands
-retain their existing behavior.
+Record, draft and file commands retain their existing behavior. Automated write
+tests use HTTP fixtures; real credentials are never used for write tests.
 
 Install a release archive or run:
 
 ```sh
-go install github.com/kehao95/zenodo-cli@v0.1.1
+go install github.com/kehao95/zenodo-cli@v0.1.2
 ```
 
-Formatting, vet, race-enabled tests and build passed locally. Tests verify
-credential isolation, token redaction, missing credentials without requests,
-ignored legacy config, and rejection of removed commands/flags.
+Formatting, vet, race-enabled tests and build passed locally. Tests cover token
+redaction, missing credentials without requests, ignored legacy config and token
+variables, endpoint precedence, and removed command/flag rejection.
+
+v0.1.1 was an intermediate tagged build and was not published as a release.
 
 # v0.1.0 — Initial release
 

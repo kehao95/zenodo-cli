@@ -10,15 +10,8 @@ import (
 )
 
 const Production = "https://zenodo.org/api"
-const Sandbox = "https://sandbox.zenodo.org/api"
 
-func Endpoint(base string, sandbox bool) (string, error) {
-	if sandbox && base != "" {
-		return "", errs.New(2, "configuration", "--sandbox and --base-url are mutually exclusive")
-	}
-	if sandbox {
-		return Sandbox, nil
-	}
+func Endpoint(base string) (string, error) {
 	if base == "" {
 		base = os.Getenv("ZENODO_BASE_URL")
 	}
@@ -38,18 +31,6 @@ func Endpoint(base string, sandbox bool) (string, error) {
 	}
 	u.Host = strings.ToLower(u.Host)
 	return u.String(), nil
-}
-
-// Token selects only the environment credential for the chosen endpoint.
-func Token(endpoint string) (string, string) {
-	key := "ZENODO_CUSTOM_ACCESS_TOKEN"
-	switch endpoint {
-	case Production:
-		key = "ZENODO_ACCESS_TOKEN"
-	case Sandbox:
-		key = "ZENODO_SANDBOX_ACCESS_TOKEN"
-	}
-	return strings.TrimSpace(os.Getenv(key)), key
 }
 
 func ReadOnly() (bool, error) {

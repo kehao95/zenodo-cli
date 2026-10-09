@@ -6,8 +6,8 @@ reference. Use the documented REST deposition API, not an inferred private API.
 
 ## Delivery sequence and acceptance
 
-1. Foundation: independently testable root command, endpoint-specific
-   environment credentials, typed errors, version, CI and release build.
+1. Foundation: independently testable root command, environment-only
+   credentials, typed errors, version, CI and release build.
 2. HTTP boundary: HTTPS, same-origin links and redirects, explicit write commands,
    immutable environment read-only policy, confirmation for irreversible or
    destructive actions, bounded GET retries, cancellation.
@@ -33,8 +33,8 @@ All eight delivery phases are implemented. The concrete verification results
 and production-versus-fixture boundary are recorded in docs/VALIDATION.md.
 
 - No automatic create-and-publish convenience command; upload never publishes.
-- No production mutation in tests. Sandbox needs its own account/token; a
-  production token must never be silently reused for sandbox or a custom host.
+- No production mutation in tests. Authentication uses only ZENODO_ACCESS_TOKEN,
+  without config-file persistence or a dedicated sandbox mode.
 - Metadata updates replace the supplied full object, preserving unknown fields
   exactly rather than inventing a client-side subset of Zenodo's schema.
 - General JSON input receives structural validation; Zenodo owns full semantic

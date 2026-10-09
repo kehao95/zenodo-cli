@@ -16,7 +16,7 @@ go install github.com/kehao95/zenodo-cli@latest
 ```
 
 Or download a prebuilt **zenodo** binary from
-[v0.1.1](https://github.com/kehao95/zenodo-cli/releases/tag/v0.1.1).
+[v0.1.2](https://github.com/kehao95/zenodo-cli/releases/tag/v0.1.2).
 Archives cover Linux, macOS and Windows on amd64 and arm64, with SHA256 checksums.
 
 From a checkout:
@@ -39,20 +39,15 @@ zenodo auth status
 zenodo auth test
 ```
 
-Authentication uses environment variables only; the CLI never reads or writes
-credential files. Set the token in your shell (for example, `~/.zshrc`).
+Authentication uses only `ZENODO_ACCESS_TOKEN` from your shell (for example,
+`~/.zshrc`). `auth status` reports whether it is set, and `auth test` verifies
+it with a GET. Unset the variable to stop using the token.
 
-| Endpoint | Token environment variable |
-| --- | --- |
-| Production (default) | `ZENODO_ACCESS_TOKEN` |
-| Sandbox (`--sandbox`) | `ZENODO_SANDBOX_ACCESS_TOKEN` |
-| Custom (`--base-url`) | `ZENODO_CUSTOM_ACCESS_TOKEN` |
-
-Production credentials are never automatically sent to sandbox or custom hosts.
-`auth status` shows the selected variable and whether a token is present;
-`auth test` verifies it with a GET. To stop using a token, unset its variable.
-There are no `auth login`, `auth logout`, or `--config` options. Existing config
-files from v0.1.0 are ignored and left untouched.
+The CLI does not read or write credential files. There is no login/logout flow
+or sandbox mode. Existing v0.1.0 config files are ignored and left untouched.
+The API defaults to `https://zenodo.org/api`; `--base-url` or `ZENODO_BASE_URL`
+can explicitly override it and will use the same token. Response links and
+redirects must stay on the selected origin.
 
 ## Draft → preview → publish
 
@@ -157,7 +152,7 @@ Exit codes: `0` success, `1` general/API conflict, `2` input/configuration,
 
 ## Development and current state
 
-v0.1.1 simplifies authentication to environment variables only.
+v0.1.2 simplifies authentication to one environment variable.
 The v0.1.0 release binaries retain their original config-file support.
 
 ```sh
@@ -180,7 +175,5 @@ checks are GET-only. Implementation ownership is this repository.
 
 ## Open
 
-No required implementation work remains for the initial scope. Validating real
-write workflows on a disposable sandbox account is an optional follow-up;
-production write behavior has been tested with HTTP fixtures rather than real
-account mutations.
+No required implementation work remains for the initial scope. Write behavior
+is tested with HTTP fixtures rather than real account mutations.
