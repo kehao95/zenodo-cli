@@ -140,3 +140,16 @@ CLI source and test paths have no changes relative to the pre-follow-up HEAD.
 No live Zenodo request was made during this instruction-only revision.
 Issue #1 remains open
 because its original code-level acceptance criteria exceed the narrowed scope.
+
+## v0.1.3 instruction-only release
+
+[v0.1.3](https://github.com/kehao95/zenodo-cli/releases/tag/v0.1.3) was published
+on 2026-10-09 from commit `2eb769ae94dca578fbd7d4ec97985ca1a0c45936`.
+The CLI source and test paths are identical to v0.1.2; only documentation changed.
+[Tagged-source CI](https://github.com/kehao95/zenodo-cli/actions/runs/37868926704)
+and the [release workflow](https://github.com/kehao95/zenodo-cli/actions/runs/37868926660)
+passed. All six platform archives matched checksums.txt and contain the updated
+README. The released Linux amd64 binary passed version, unauthenticated auth
+status, metadata template/validation and help checks without Zenodo requests.
+GitHub reports a published stable release. No new runtime approval enforcement
+or preview field is claimed.
