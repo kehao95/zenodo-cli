@@ -14,6 +14,9 @@ Initial delivery checked on 2026-10-09 using Go 1.25.9 on Linux amd64.
   native build. CI runs format/vet/race tests/build on all three operating systems.
   Source checkout is forced to LF through .gitattributes so Windows Git's CRLF
   conversion cannot cause false gofmt failures.
+- [GitHub CI run 37866367961](https://github.com/kehao95/zenodo-cli/actions/runs/37866367961)
+  passed on Linux, macOS and Windows for implementation/CI commit `28936f7`.
+  Each platform passed formatting, vet, race-enabled tests and build.
 
 Meaningful tests exercise actual command dispatch, request method/path/body,
 metadata precision and unknown fields, config auth and credential isolation,
