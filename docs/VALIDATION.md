@@ -8,7 +8,7 @@ Initial delivery checked on 2026-10-09 using Go 1.25.9 on Linux amd64.
 - `go test -count=1 -coverpkg=./... -coverprofile=coverage.out ./...`:
   aggregate statement coverage 84.4% (including CLI and transport packages).
 - `goreleaser check` with GoReleaser v2.18.2 passed. The downloaded binary's
-  SHA256 was verified against the release checksums. No release/tag was created.
+  SHA256 was verified against the GoReleaser release checksums.
 - Cobra help/version and command registration checked from built `bin/zenodo`.
 - Cross-builds for macOS arm64 and Windows amd64 passed; Linux amd64 is the
   native build. CI runs format/vet/race tests/build on all three operating systems.
@@ -52,6 +52,22 @@ Two live compatibility findings were fixed before delivery: file-content GET
 rejects Accept: application/octet-stream, so downloads now send */*; the old
 /api/licenses endpoint returns 404, so license commands use
 /api/vocabularies/licenses. The latter returns current vocabulary payloads.
+
+## Initial release
+
+[v0.1.0](https://github.com/kehao95/zenodo-cli/releases/tag/v0.1.0) was published
+on 2026-10-09 from annotated tag `v0.1.0`, commit
+`c123a05781923d40a9239eb7094d7b41e0203842`.
+
+- [Release workflow](https://github.com/kehao95/zenodo-cli/actions/runs/37866662931)
+  passed and uploaded Linux, macOS and Windows archives for amd64 and arm64,
+  plus `checksums.txt`.
+- All six downloaded archives matched their SHA256 entries in `checksums.txt`.
+- The released Linux amd64 binary reported version `0.1.0` and the tagged
+  commit; metadata template generation and validation passed.
+- [Tagged-source CI](https://github.com/kehao95/zenodo-cli/actions/runs/37866662928)
+  passed formatting, vet, race-enabled tests and build on all three platforms.
+- GitHub reports the release as published, neither draft nor prerelease.
 
 ## Workspace closure
 
