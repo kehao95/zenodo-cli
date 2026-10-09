@@ -1,3 +1,29 @@
+# v0.1.3 — Agent workflow instructions
+
+This release updates instructions only. CLI commands, help, preview JSON and
+HTTP behavior are unchanged from v0.1.2.
+
+- Prepare drafts, metadata and uploads within the requested task without
+  repeated approvals.
+- Before every publish or republish, show the draft ID, title, version, files
+  and preview link, then obtain separate explicit human confirmation.
+- General prepare/update/refresh requests do not authorize publication. Material
+  changes after review require a renewed confirmation.
+- `--confirm ID` checks the target only; it does not prove human approval.
+  The same instruction applies to generic API publishing.
+- Prefer native CLI downloads, then compare SHA256 with the expected local
+  artifact when exact file identity matters.
+
+These instructions are in README, AGENTS.md and design guidance. README and
+project documentation are included in the release archives. The noninteractive
+CLI does not enforce approval provenance or introduce an approval prompt/flag.
+
+Install a release archive or run:
+
+```sh
+go install github.com/kehao95/zenodo-cli@v0.1.3
+```
+
 # v0.1.2 — Simplified authentication
 
 Authentication uses only `ZENODO_ACCESS_TOKEN` from your shell. No credential

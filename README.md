@@ -32,7 +32,7 @@ go install github.com/kehao95/zenodo-cli@latest
 ```
 
 Or download a prebuilt **zenodo** binary from
-[v0.1.2](https://github.com/kehao95/zenodo-cli/releases/tag/v0.1.2).
+[v0.1.3](https://github.com/kehao95/zenodo-cli/releases/tag/v0.1.3).
 Archives cover Linux, macOS and Windows on amd64 and arm64, with SHA256 checksums.
 
 From a checkout:
@@ -175,8 +175,7 @@ zenodo api POST "/deposit/depositions/$draft/actions/publish" --confirm "$draft"
 ```
 
 The CLI never automatically retries mutations. GET 429/503 responses get bounded
-retries,
-honoring `Retry-After`; use `--retries 0` to disable them. Increase `--timeout`
+retries, honoring `Retry-After`; use `--retries 0` to disable them. Increase `--timeout`
 for large transfers (default `2m`). An interrupted write can have succeeded on
 the server; inspect the draft before repeating it.
 
@@ -192,7 +191,8 @@ Exit codes: `0` success, `1` general/API conflict, `2` input/configuration,
 
 ## Development and current state
 
-v0.1.2 simplifies authentication to one environment variable.
+v0.1.3 adds agent publication and download-verification instructions.
+CLI behavior is unchanged from v0.1.2, which uses one token environment variable.
 The v0.1.0 release binaries retain their original config-file support.
 
 ```sh
