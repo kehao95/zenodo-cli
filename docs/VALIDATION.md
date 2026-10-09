@@ -12,6 +12,8 @@ Initial delivery checked on 2026-10-09 using Go 1.25.9 on Linux amd64.
 - Cobra help/version and command registration checked from built `bin/zenodo`.
 - Cross-builds for macOS arm64 and Windows amd64 passed; Linux amd64 is the
   native build. CI runs format/vet/race tests/build on all three operating systems.
+  Source checkout is forced to LF through .gitattributes so Windows Git's CRLF
+  conversion cannot cause false gofmt failures.
 
 Meaningful tests exercise actual command dispatch, request method/path/body,
 metadata precision and unknown fields, config auth and credential isolation,
