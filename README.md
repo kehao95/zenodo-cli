@@ -4,8 +4,24 @@ Zenodo for agents. A Go CLI inspired by [slk](https://github.com/kehao95/slack-a
 JSON by default, noninteractive commands, token environment variables, and
 stable exit codes. Use `--human` for indented JSON.
 
-Prepare a real Zenodo draft, inspect it in the browser, and publish explicitly.
-Creating drafts and uploading files never publishes them.
+Prepare a real Zenodo draft and inspect it before publication. Creating drafts
+and uploading files never publishes them.
+
+**Agent publication rule:** draft preparation can proceed automatically within
+the requested task. Before every publish or republish, present the exact draft
+ID, title, version, files and preview link, explain the public action, then obtain
+a **separate explicit human confirmation**. A general “prepare/update/refresh”
+request is not that confirmation. Material changes after review require renewed
+confirmation. This applies to both `drafts publish` and generic API publishing.
+`--confirm ID` checks the target; an agent supplying it is not human approval.
+The CLI stays noninteractive and cannot technically prove who approved the action.
+This rule is agent guidance; it does not add a CLI prompt, flag or preview field.
+
+When asking for approval, include the draft ID, title, version (or state that it
+is unset), file names/sizes/checksums, and preview URL. For republishing, also
+summarize changes from the published version. Wait for the human's reply before
+running a publish command. If the reviewed contents materially change, present
+the updated draft and obtain a new confirmation.
 
 ## Install
 
@@ -66,7 +82,8 @@ zenodo files list "$draft"
 # Return current draft, common metadata checks, and logged-in browser URLs.
 zenodo drafts preview "$draft"
 
-# Make it public only when ready. --confirm must match the target ID.
+# STOP: show the prepared draft to the human and obtain separate publish confirmation.
+# Only after that response: --confirm must match the reviewed target ID.
 zenodo drafts publish "$draft" --confirm "$draft"
 ```
 
@@ -93,6 +110,20 @@ zenodo records search --query 'climate' --all --max-pages 5
 zenodo licenses get cc-by-4.0
 ```
 
+Prefer these commands over ad hoc HTTP scripts for record metadata and file
+downloads; `api GET` covers read endpoints without a dedicated command.
+Server checksum verification checks transfer integrity. When exact artifact
+identity matters, also compare the downloaded file with the expected local file:
+
+```sh
+zenodo records download RECORD_ID dataset.zip --output ./downloaded.zip
+sha256sum ./dataset.zip ./downloaded.zip  # Linux
+# macOS: shasum -a 256 ./dataset.zip ./downloaded.zip
+```
+
+The two SHA256 digests must match. A successful download alone does not establish
+that the published artifact matches the intended local file.
+
 Single-page commands preserve native Zenodo JSON. `--all` returns
 `{"pages": [...], "complete": true}`; a bounded result includes
 `"complete": false` and a `next` URL. Maximum 100 pages by default. Exports write
@@ -103,10 +134,11 @@ require `--force`. Upload name collisions require `--replace`.
 ## Editing and versions
 
 ```sh
-# Edit published metadata, then preview and republish explicitly.
+# Edit published metadata, then preview and obtain a NEW human publish confirmation.
 zenodo drafts edit RECORD_ID
 zenodo drafts update RECORD_ID --metadata @metadata.json
 zenodo drafts preview RECORD_ID
+# STOP until the human confirms this specific republish.
 zenodo drafts publish RECORD_ID --confirm RECORD_ID
 
 # A new version returns both source and the new draft (draft.id is the new ID).
@@ -134,8 +166,16 @@ ZENODO_CLI_READ_ONLY=true zenodo drafts list
 ```
 
 All API paths are relative to `/api`; absolute links must share the selected
-origin. Generic calls follow the same write confirmation policy. The CLI never
-automatically retries mutations. GET 429/503 responses get bounded retries,
+origin. Generic calls follow the same write confirmation policy. The agent's
+separate human-confirmation rule also applies to generic publishing:
+
+```sh
+# Only after the human approves the reviewed draft, as described above.
+zenodo api POST "/deposit/depositions/$draft/actions/publish" --confirm "$draft"
+```
+
+The CLI never automatically retries mutations. GET 429/503 responses get bounded
+retries,
 honoring `Retry-After`; use `--retries 0` to disable them. Increase `--timeout`
 for large transfers (default `2m`). An interrupted write can have succeeded on
 the server; inspect the draft before repeating it.
@@ -175,5 +215,9 @@ checks are GET-only. Implementation ownership is this repository.
 
 ## Open
 
-No required implementation work remains for the initial scope. Write behavior
-is tested with HTTP fixtures rather than real account mutations.
+[Issue #1](https://github.com/kehao95/zenodo-cli/issues/1) records the publication
+approval gap. README and AGENTS.md now document separate human confirmation and
+native download verification. This follow-up changes instructions only; CLI
+help, preview JSON and HTTP behavior remain as released in v0.1.2. The issue's
+original help/preview acceptance items are outside this narrowed scope. Human
+approval provenance remains a workflow responsibility.

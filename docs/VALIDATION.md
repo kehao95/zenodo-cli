@@ -106,3 +106,37 @@ not changed. This does not affect the Zenodo repository's checks.
 The cancelled full-server investigation left no running/stopped test containers,
 compose network, test service volumes, local source checkout or Python virtualenv
 in this repository. Routine Docker/download caches may remain on the host.
+
+## Publication confirmation instructions — 9 October
+
+[Issue #1](https://github.com/kehao95/zenodo-cli/issues/1) records an operational
+incident: the agent published a user preprint after interpreting a general
+refresh request as publication authority, without a separate final human
+confirmation. This was production task execution, not an automated test.
+The draft, upload, metadata, preview and publish endpoints worked; that technical
+success did not establish the required human approval.
+
+The follow-up is narrowed to instructions at the user's request. README,
+AGENTS.md and design guidance explain separate human confirmation, review
+contents, republish changes and native download verification. Proposed help-text
+and preview-JSON changes and their dedicated tests were removed. CLI source and
+tests match the v0.1.2 implementation; no new approval prompt, flag or runtime
+field is introduced. The target-ID check remains technical; human approval
+provenance is a workflow responsibility. The original issue's help/preview
+acceptance criteria are not claimed as implemented under this narrowed scope.
+
+A GET-only check of public record 23251616 using v0.1.2 successfully ran
+`records get`, `records files` and `records download` for all four public files,
+with ZENODO_ACCESS_TOKEN removed and ZENODO_CLI_READ_ONLY=true. CLI checksums and
+independent comparison against expected local SHA256 hashes passed. Using a
+separate Python HTTP downloader was unnecessary for this supported workflow.
+
+The earlier local patch recorded an installed build named
+`0.1.2+local-confirmation-help`; that is not a GitHub release. Instruction-only
+changes do not require a new executable build or release. The installed binary
+was restored to the official v0.1.2 Linux amd64 release after verifying the
+archive SHA256 against checksums.txt. `make check` and `git diff --check` passed;
+CLI source and test paths have no changes relative to the pre-follow-up HEAD.
+No live Zenodo request was made during this instruction-only revision.
+Issue #1 remains open
+because its original code-level acceptance criteria exceed the narrowed scope.

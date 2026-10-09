@@ -12,6 +12,16 @@ Authentication uses only ZENODO_ACCESS_TOKEN; no config files or sandbox mode.
 Never log tokens or Authorization.
 
 Enforce safety at the HTTP boundary, including generic API and redirects.
+Draft preparation within an authorised task may proceed automatically. Before
+every publish/republish, show the exact draft ID, title, version, files and preview
+link, then obtain separate explicit human confirmation. General update/refresh
+requests are not final publication consent. If reviewed contents materially
+change, ask again. This includes generic API publishing. --confirm ID validates
+the target only; never equate an agent-supplied flag with human approval.
+Follow README's review and download-verification examples. Use native record/file
+commands first; compare downloaded artifacts with expected local digests when
+exact identity matters. Keep this policy in instructions, without adding CLI
+prompts, approval flags or preview fields.
 Explicit commands perform mutations; publish/delete/discard need --confirm ID.
 Never retry mutations, even after a timeout.
 Update docs and meaningful tests when command or safety contracts change.

@@ -65,6 +65,15 @@ upload have no implicit publish path. Browser preview is `/records/:id?preview=1
 and needs an authenticated browser session; API self links are separate.
 Preview's metadata checks do not promise that the server will accept publishing.
 
+Agents may complete requested draft preparation without repeated approvals.
+Before every publish or republish, they must present the exact draft ID, title,
+version, files and preview URL and obtain a separate explicit human confirmation.
+A general update/refresh request is insufficient; material changes require
+renewed approval. README and AGENTS.md describe this contract for dedicated and
+generic publish routes; CLI help and preview JSON are unchanged. This is
+workflow guidance: the noninteractive CLI cannot verify human approval
+provenance, and `--confirm ID` is only a target-ID check.
+
 Ordinary writes use explicit commands without a global write enable flag.
 Publish, discard and deletion require `--confirm ID`. This applies at the HTTP
 boundary, including generic API calls. An optional `ZENODO_CLI_READ_ONLY=true`
