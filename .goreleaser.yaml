@@ -1,0 +1,29 @@
+version: 2
+project_name: zenodo
+before:
+  hooks:
+    - go mod tidy
+    - go test ./...
+builds:
+  - main: .
+    binary: zenodo
+    env: [CGO_ENABLED=0]
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
+archives:
+  - formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files: [README.md, LICENSE, docs/*.md]
+checksum:
+  name_template: checksums.txt
+changelog:
+  sort: asc
+release:
+  github:
+    owner: kehao95
+    name: zenodo-cli
+  draft: true

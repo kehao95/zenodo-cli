@@ -1,0 +1,24 @@
+name: CI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  check:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Format
+        shell: bash
+        run: test -z "$(gofmt -l main.go cmd internal)"
+      - run: go vet ./...
+      - run: go test -race ./...
+      - run: go build ./...
