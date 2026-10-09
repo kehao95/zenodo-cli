@@ -16,7 +16,7 @@ go install github.com/kehao95/zenodo-cli@latest
 ```
 
 Or download a prebuilt **zenodo** binary from
-[v0.1.0](https://github.com/kehao95/zenodo-cli/releases/tag/v0.1.0).
+[v0.1.1](https://github.com/kehao95/zenodo-cli/releases/tag/v0.1.1).
 Archives cover Linux, macOS and Windows on amd64 and arm64, with SHA256 checksums.
 
 From a checkout:
@@ -37,20 +37,22 @@ Tagged releases are built with GoReleaser.
 # Use ZENODO_ACCESS_TOKEN already exported in your shell.
 zenodo auth status
 zenodo auth test
-
-# Optionally persist your existing environment token; stdout never includes it.
-printf '%s' "$ZENODO_ACCESS_TOKEN" | zenodo auth login --token-stdin --verify
 ```
 
-Config defaults to `$XDG_CONFIG_HOME/zenodo-cli/config.json` or
-`~/.config/zenodo-cli/config.json`, saved atomically. On macOS/Linux it has mode
-`0600`; Windows uses inherited filesystem ACLs. Tokens are
-stored per API endpoint. `--config` overrides `ZENODO_CLI_CONFIG`.
+Authentication uses environment variables only; the CLI never reads or writes
+credential files. Set the token in your shell (for example, `~/.zshrc`).
 
-Production uses `ZENODO_ACCESS_TOKEN`; `--sandbox` uses the **separate**
-`ZENODO_SANDBOX_ACCESS_TOKEN`. A production token is never automatically sent to
-sandbox or a custom `--base-url`. `auth logout` removes only the selected saved
-token; exported environment tokens continue to take precedence.
+| Endpoint | Token environment variable |
+| --- | --- |
+| Production (default) | `ZENODO_ACCESS_TOKEN` |
+| Sandbox (`--sandbox`) | `ZENODO_SANDBOX_ACCESS_TOKEN` |
+| Custom (`--base-url`) | `ZENODO_CUSTOM_ACCESS_TOKEN` |
+
+Production credentials are never automatically sent to sandbox or custom hosts.
+`auth status` shows the selected variable and whether a token is present;
+`auth test` verifies it with a GET. To stop using a token, unset its variable.
+There are no `auth login`, `auth logout`, or `--config` options. Existing config
+files from v0.1.0 are ignored and left untouched.
 
 ## Draft → preview → publish
 
@@ -154,6 +156,9 @@ Exit codes: `0` success, `1` general/API conflict, `2` input/configuration,
 `7` not found.
 
 ## Development and current state
+
+v0.1.1 simplifies authentication to environment variables only.
+The v0.1.0 release binaries retain their original config-file support.
 
 ```sh
 go fmt ./...

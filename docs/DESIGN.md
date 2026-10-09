@@ -19,8 +19,8 @@ Numeric identifiers and metadata JSON numbers retain precision via json.Number.
 
 | Command | API request |
 | --- | --- |
-| auth test / login --verify | GET /deposit/depositions?size=1 |
-| auth status / login / logout | Local config |
+| auth test | GET /deposit/depositions?size=1 |
+| auth status | Inspect selected token environment variable |
 | records search (alias list) | GET /records |
 | records get (alias info) / files | GET /records/:id |
 | records export | GET /records/:id with requested Accept |
@@ -82,9 +82,9 @@ for tests. TLS verification is always enabled.
 
 Public endpoints work anonymously; private commands require a token. Production
 and sandbox environment variables apply only to their exact endpoints; custom
-hosts use their own config entry populated by `auth login --token-stdin`.
-Config tokens are plaintext, endpoint-scoped, mode 0600, atomically replaced.
-Environment tokens take precedence. Errors redact the selected credential.
+hosts use `ZENODO_CUSTOM_ACCESS_TOKEN`. No credential files are read or written;
+there is no login/logout persistence flow or config-path flag. Existing v0.1.0
+config files are ignored and left untouched. Errors redact the selected credential.
 
 ## Pagination, retries and limits
 

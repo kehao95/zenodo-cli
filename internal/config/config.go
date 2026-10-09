@@ -1,10 +1,8 @@
 package config
 
 import (
-	"encoding/json"
 	"net/url"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -13,28 +11,6 @@ import (
 
 const Production = "https://zenodo.org/api"
 const Sandbox = "https://sandbox.zenodo.org/api"
-
-type File struct {
-	Tokens map[string]string `json:"tokens"`
-}
-
-func Path(explicit string) (string, error) {
-	if explicit != "" {
-		return explicit, nil
-	}
-	if p := os.Getenv("ZENODO_CLI_CONFIG"); p != "" {
-		return p, nil
-	}
-	base := os.Getenv("XDG_CONFIG_HOME")
-	if base == "" {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return "", err
-		}
-		base = filepath.Join(home, ".config")
-	}
-	return filepath.Join(base, "zenodo-cli", "config.json"), nil
-}
 
 func Endpoint(base string, sandbox bool) (string, error) {
 	if sandbox && base != "" {
@@ -64,80 +40,16 @@ func Endpoint(base string, sandbox bool) (string, error) {
 	return u.String(), nil
 }
 
-func Read(path string) (File, error) {
-	var f File
-	b, err := os.ReadFile(path)
-	if os.IsNotExist(err) {
-		return File{Tokens: map[string]string{}}, nil
-	}
-	if err != nil {
-		return f, errs.New(2, "configuration", "cannot read config: "+err.Error())
-	}
-	if json.Unmarshal(b, &f) != nil {
-		return f, errs.New(2, "configuration", "config must be a JSON object with a tokens map")
-	}
-	if f.Tokens == nil {
-		f.Tokens = map[string]string{}
-	}
-	return f, nil
-}
-
-func Token(path, endpoint string) (string, string, error) {
-	key := ""
-	if endpoint == Production {
+// Token selects only the environment credential for the chosen endpoint.
+func Token(endpoint string) (string, string) {
+	key := "ZENODO_CUSTOM_ACCESS_TOKEN"
+	switch endpoint {
+	case Production:
 		key = "ZENODO_ACCESS_TOKEN"
-	}
-	if endpoint == Sandbox {
+	case Sandbox:
 		key = "ZENODO_SANDBOX_ACCESS_TOKEN"
 	}
-	if key != "" && os.Getenv(key) != "" {
-		return strings.TrimSpace(os.Getenv(key)), key, nil
-	}
-	f, err := Read(path)
-	if err != nil {
-		return "", "", err
-	}
-	return f.Tokens[endpoint], "config", nil
-}
-
-func Save(path, endpoint, token string) error {
-	f, err := Read(path)
-	if err != nil {
-		return err
-	}
-	if token == "" {
-		delete(f.Tokens, endpoint)
-	} else {
-		f.Tokens[endpoint] = token
-	}
-	b, err := json.MarshalIndent(f, "", "  ")
-	if err != nil {
-		return err
-	}
-	dir := filepath.Dir(path)
-	if err = os.MkdirAll(dir, 0700); err != nil {
-		return err
-	}
-	tmp, err := os.CreateTemp(dir, ".config-*")
-	if err != nil {
-		return err
-	}
-	defer os.Remove(tmp.Name())
-	if _, err = tmp.Write(append(b, '\n')); err != nil {
-		tmp.Close()
-		return err
-	}
-	if err = tmp.Sync(); err != nil {
-		tmp.Close()
-		return err
-	}
-	if err = tmp.Close(); err != nil {
-		return err
-	}
-	if err = os.Rename(tmp.Name(), path); err != nil {
-		return err
-	}
-	return nil
+	return strings.TrimSpace(os.Getenv(key)), key
 }
 
 func ReadOnly() (bool, error) {

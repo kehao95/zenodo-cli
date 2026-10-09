@@ -127,7 +127,7 @@ func (c *Client) Check(method string, u *url.URL) error {
 
 func (c *Client) RequireToken() error {
 	if c.Token == "" {
-		return errs.New(2, "missing_token", "no token for selected endpoint; set its token environment variable or use auth login --token-stdin")
+		return errs.New(2, "missing_token", "no token for selected endpoint; set ZENODO_ACCESS_TOKEN (production), ZENODO_SANDBOX_ACCESS_TOKEN (sandbox), or ZENODO_CUSTOM_ACCESS_TOKEN (custom endpoint)")
 	}
 	return nil
 }

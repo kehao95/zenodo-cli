@@ -16,7 +16,6 @@ import (
 
 type app struct {
 	client                   *zenodo.Client
-	configPath               string
 	source                   string
 	base                     string
 	sandbox, human, readOnly bool
@@ -38,15 +37,7 @@ func New(in io.Reader, out, errOut io.Writer, version string) *cobra.Command {
 		if err != nil {
 			return err
 		}
-		path, err := config.Path(a.configPath)
-		if err != nil {
-			return err
-		}
-		a.configPath = path
-		token, source, err := config.Token(path, endpoint)
-		if err != nil {
-			return err
-		}
+		token, source := config.Token(endpoint)
 		a.source = source
 		envRO, err := config.ReadOnly()
 		if err != nil {
@@ -59,7 +50,6 @@ func New(in io.Reader, out, errOut io.Writer, version string) *cobra.Command {
 		return err
 	}
 	f := root.PersistentFlags()
-	f.StringVar(&a.configPath, "config", "", "config file (default: ~/.config/zenodo-cli/config.json)")
 	f.StringVar(&a.base, "base-url", "", "API URL (default: ZENODO_BASE_URL or https://zenodo.org/api)")
 	f.BoolVar(&a.sandbox, "sandbox", false, "use sandbox and its separate ZENODO_SANDBOX_ACCESS_TOKEN")
 	f.BoolVarP(&a.human, "human", "H", false, "pretty JSON for human inspection")

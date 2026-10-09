@@ -1,3 +1,28 @@
+# v0.1.1 — Environment-only authentication
+
+Authentication now uses environment variables exclusively. The CLI no longer
+reads or writes credential files and removes `--config`, `auth login`, and
+`auth logout`. Existing config files are ignored and left untouched.
+
+- Production: `ZENODO_ACCESS_TOKEN`.
+- Sandbox: `ZENODO_SANDBOX_ACCESS_TOKEN`.
+- Custom API endpoint: `ZENODO_CUSTOM_ACCESS_TOKEN`.
+
+`auth status` reports the selected variable without revealing its value;
+`auth test` verifies the credential with a GET. Production credentials are
+never reused for sandbox or custom hosts. All record, draft and file commands
+retain their existing behavior.
+
+Install a release archive or run:
+
+```sh
+go install github.com/kehao95/zenodo-cli@v0.1.1
+```
+
+Formatting, vet, race-enabled tests and build passed locally. Tests verify
+credential isolation, token redaction, missing credentials without requests,
+ignored legacy config, and rejection of removed commands/flags.
+
 # v0.1.0 — Initial release
 
 Zenodo CLI for agents and scripts, inspired by slk. JSON output by default,

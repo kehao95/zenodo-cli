@@ -6,8 +6,8 @@ reference. Use the documented REST deposition API, not an inferred private API.
 
 ## Delivery sequence and acceptance
 
-1. Foundation: independently testable root command, endpoint-specific secure
-   config, environment credentials, typed errors, version, CI and release build.
+1. Foundation: independently testable root command, endpoint-specific
+   environment credentials, typed errors, version, CI and release build.
 2. HTTP boundary: HTTPS, same-origin links and redirects, explicit write commands,
    immutable environment read-only policy, confirmation for irreversible or
    destructive actions, bounded GET retries, cancellation.

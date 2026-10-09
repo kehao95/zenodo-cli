@@ -11,14 +11,11 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-
-	"github.com/kehao95/zenodo-cli/internal/config"
 )
 
 type fixture struct {
 	t       *testing.T
 	server  *httptest.Server
-	path    string
 	calls   []string
 	handler http.HandlerFunc
 }
@@ -29,7 +26,8 @@ func newFixture(t *testing.T) *fixture {
 	t.Setenv("ZENODO_BASE_URL", "")
 	t.Setenv("ZENODO_ACCESS_TOKEN", "")
 	t.Setenv("ZENODO_SANDBOX_ACCESS_TOKEN", "")
-	f := &fixture{t: t, path: filepath.Join(t.TempDir(), "config.json")}
+	t.Setenv("ZENODO_CUSTOM_ACCESS_TOKEN", "fixture-token")
+	f := &fixture{t: t}
 	f.server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		f.calls = append(f.calls, r.Method+" "+r.URL.RequestURI())
 		if r.Header.Get("Authorization") != "Bearer fixture-token" {
@@ -43,16 +41,13 @@ func newFixture(t *testing.T) *fixture {
 		}
 	}))
 	t.Cleanup(f.server.Close)
-	if err := config.Save(f.path, f.server.URL+"/api", "fixture-token"); err != nil {
-		t.Fatal(err)
-	}
 	return f
 }
 
 func (f *fixture) run(stdin string, args ...string) (int, string, string) {
 	f.t.Helper()
 	var out, errOut bytes.Buffer
-	argv := append([]string{"--config", f.path, "--base-url", f.server.URL + "/api", "--retries", "0"}, args...)
+	argv := append([]string{"--base-url", f.server.URL + "/api", "--retries", "0"}, args...)
 	code := Execute(context.Background(), argv, strings.NewReader(stdin), &out, &errOut, "test")
 	return code, out.String(), errOut.String()
 }
@@ -298,38 +293,20 @@ func TestPreviewAndMetadata(t *testing.T) {
 	}
 }
 
-func TestAuthLoginStatusLogoutAndFileInput(t *testing.T) {
+func TestEnvironmentAuthStatusAndFileInput(t *testing.T) {
 	f := newFixture(t)
-	code, out, e := f.run("new-token\n", "auth", "login", "--token-stdin")
-	if code != 0 || strings.Contains(out, "new-token") {
+	code, out, e := f.run("", "auth", "status", "--human")
+	if code != 0 || !strings.Contains(out, `"configured": true`) || !strings.Contains(out, "ZENODO_CUSTOM_ACCESS_TOKEN") || strings.Contains(out, "fixture-token") || strings.Contains(out, `"config":`) {
 		t.Fatalf("%d %s %s", code, out, e)
 	}
-	saved, _ := config.Read(f.path)
-	if saved.Tokens[f.server.URL+"/api"] != "new-token" {
-		t.Fatal("token was not saved")
-	}
-	code, out, e = f.run("", "auth", "status", "--human")
-	if code != 0 || !strings.Contains(out, `"configured": true`) || strings.Contains(out, "new-token") {
+	t.Setenv("ZENODO_CUSTOM_ACCESS_TOKEN", "")
+	if code, out, e = f.run("", "auth", "status"); code != 0 || !strings.Contains(out, `"configured":false`) {
 		t.Fatalf("%d %s %s", code, out, e)
 	}
-	if code, _, e = f.run("", "auth", "logout"); code != 0 {
-		t.Fatal(e)
+	if code, _, _ = f.run("", "auth", "test"); code != 2 || len(f.calls) != 0 {
+		t.Fatal("missing token accepted or request sent")
 	}
-	if code, _, _ = f.run("", "auth", "test"); code != 2 {
-		t.Fatal("missing token accepted")
-	}
-	if code, _, _ = f.run("two tokens", "auth", "login", "--token-stdin"); code != 2 {
-		t.Fatal("bad token accepted")
-	}
-	if code, _, _ = f.run("token", "auth", "login"); code != 2 {
-		t.Fatal("missing token-stdin accepted")
-	}
-	if err := config.Save(f.path, f.server.URL+"/api", "fixture-token"); err != nil {
-		t.Fatal(err)
-	}
-	if code, _, e = f.run("fixture-token\n", "auth", "login", "--token-stdin", "--verify"); code != 0 {
-		t.Fatal(e)
-	}
+	t.Setenv("ZENODO_CUSTOM_ACCESS_TOKEN", "fixture-token")
 	metadata := filepath.Join(t.TempDir(), "metadata.json")
 	os.WriteFile(metadata, []byte(`{"title":"File input"}`), 0600)
 	f.handler = func(w http.ResponseWriter, r *http.Request) {
@@ -344,5 +321,32 @@ func TestAuthLoginStatusLogoutAndFileInput(t *testing.T) {
 	}
 	if code, _, e = f.run("", "depositions", "create", "--metadata", "@"+metadata); code != 0 {
 		t.Fatal(e)
+	}
+}
+
+func TestEnvironmentAuthIgnoresLegacyConfig(t *testing.T) {
+	f := newFixture(t)
+	path := filepath.Join(t.TempDir(), "config.json")
+	legacy := []byte("malformed legacy config")
+	if err := os.WriteFile(path, legacy, 0600); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("ZENODO_CLI_CONFIG", path)
+	if code, _, e := f.run("", "auth", "test"); code != 0 {
+		t.Fatal(e)
+	}
+	got, err := os.ReadFile(path)
+	if err != nil || !bytes.Equal(got, legacy) {
+		t.Fatal("legacy config changed")
+	}
+	for _, args := range [][]string{
+		{"auth", "login"}, {"auth", "logout"}, {"auth", "status", "--config", path},
+	} {
+		if code, out, _ := f.run("", args...); code != 2 || out != "" {
+			t.Errorf("removed option accepted: %v", args)
+		}
+	}
+	if len(f.calls) != 1 {
+		t.Fatal("removed auth commands made requests")
 	}
 }
