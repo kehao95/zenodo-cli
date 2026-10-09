@@ -15,6 +15,10 @@ Requires Go 1.25 or newer:
 go install github.com/kehao95/zenodo-cli@latest
 ```
 
+Or download a prebuilt **zenodo** binary from
+[v0.1.0](https://github.com/kehao95/zenodo-cli/releases/tag/v0.1.0).
+Archives cover Linux, macOS and Windows on amd64 and arm64, with SHA256 checksums.
+
 From a checkout:
 
 ```sh
@@ -25,8 +29,7 @@ go build -o bin/zenodo .
 `go install` names the executable **zenodo-cli** after the module; source builds
 and the configured release archives name it **zenodo**. Both accept the same
 commands. Examples below use `zenodo`; substitute `zenodo-cli` for a Go install.
-Tagged releases can be built with GoReleaser; no release is required to use the
-source or Go installation.
+Tagged releases are built with GoReleaser.
 
 ## Authentication
 
@@ -159,7 +162,7 @@ go test -race ./...
 go build ./...
 ```
 
-The initial implementation covers the documented deposition lifecycle and file
+The initial v0.1.0 release covers the documented deposition lifecycle and file
 operations, public record lookup/export/download, licenses, and generic JSON
 API calls. Automated write tests use isolated HTTP fixtures. Real credential
 checks are GET-only. Implementation ownership is this repository.
@@ -172,7 +175,7 @@ checks are GET-only. Implementation ownership is this repository.
 
 ## Open
 
-No required implementation work remains for the initial scope. Publishing a
-version tag and validating real write workflows on a disposable sandbox account
-are optional follow-ups; production write behavior has been tested with HTTP
-fixtures rather than real account mutations.
+No required implementation work remains for the initial scope. Validating real
+write workflows on a disposable sandbox account is an optional follow-up;
+production write behavior has been tested with HTTP fixtures rather than real
+account mutations.

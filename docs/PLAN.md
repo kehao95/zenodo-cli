@@ -39,7 +39,8 @@ and production-versus-fixture boundary are recorded in docs/VALIDATION.md.
   exactly rather than inventing a client-side subset of Zenodo's schema.
 - General JSON input receives structural validation; Zenodo owns full semantic
   validation. A local metadata validate command catches common required fields.
-- No autonomous release tag or package registry publishing in initial delivery.
+- Release tags are created on explicit request; package registry publishing is
+  outside the initial scope.
 - OAI-PMH harvesting, monthly metadata dumps and community submission moderation
   are separate workflows; GET/API escape hatch can inspect their REST surfaces.
 
