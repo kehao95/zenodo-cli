@@ -77,7 +77,18 @@ endpoint-specific token selection are removed. Existing v0.1.0 release artifacts
 remain unchanged. Tests cover status token redaction, missing credentials without
 network access, ignored legacy config and token variables, removed command/flag
 rejection, and explicit endpoint override precedence. Formatting, vet, race tests
-and build are rerun for this change.
+and build passed locally on 2026-10-09.
+
+[v0.1.2](https://github.com/kehao95/zenodo-cli/releases/tag/v0.1.2) was published
+from commit `130820a9386a96173e7bc8e5a820e64d5df1e5f5`.
+[Tagged-source CI](https://github.com/kehao95/zenodo-cli/actions/runs/37867462440)
+and the [release build](https://github.com/kehao95/zenodo-cli/actions/runs/37867462485)
+passed. All six downloaded archives matched `checksums.txt`. The released Linux
+amd64 binary passed version, metadata and authentication smoke checks: only
+ZENODO_ACCESS_TOKEN is used; absent tokens fail before IO; status never prints
+the token; legacy config is ignored; login/logout/config/sandbox options fail.
+No real Zenodo mutation was performed. The intermediate v0.1.1 draft release
+was removed; its tag remains as build history.
 
 ## Workspace closure
 
